@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Leader extends Process {
+public class Leader extends Process {	
 	ProcessId[] acceptors;
 	ProcessId[] replicas;
 	BallotNumber ballot_number;
