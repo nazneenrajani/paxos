@@ -50,3 +50,15 @@ class ProposeMessage extends PaxosMessage {
 	public ProposeMessage(ProcessId src, int slot_number, Command command){
 		this.src = src; this.slot_number = slot_number; this.command = command;
 }	}
+
+// New message classes
+class FailureDetectMessage extends PaxosMessage {
+	Command command;
+	public FailureDetectMessage(ProcessId src){
+		this.src = src;
+}	}
+class AliveMessage extends PaxosMessage {
+	Command command;
+	public AliveMessage(ProcessId src){
+		this.src = src;
+}	}
