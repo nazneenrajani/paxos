@@ -51,6 +51,7 @@ public class Replica extends Process {
 			withdraw(new BankAccount(Integer.parseInt(operation[0]),Integer.parseInt(operation[1])),Double.parseDouble(operation[3]));
 			break;
 		case "I":
+			c.readOnly=true;
 			inquiry(new BankAccount(Integer.parseInt(operation[0]),Integer.parseInt(operation[1])));
 			break;
 		case "T":

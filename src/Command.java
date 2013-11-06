@@ -2,11 +2,13 @@ public class Command {
 	ProcessId client;
 	int req_id;
 	Object op;
+	Boolean readOnly;
 
 	public Command(ProcessId client, int req_id, Object op){
 		this.client = client;
 		this.req_id = req_id;
 		this.op = op;
+		this.readOnly = false;
 	}
 
 	public boolean equals(Object o) {
