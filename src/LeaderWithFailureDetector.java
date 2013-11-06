@@ -122,21 +122,18 @@ public class LeaderWithFailureDetector extends Leader {
 		LinkedList<PaxosMessage> pendingMessages = new LinkedList<PaxosMessage>(); 
 		Long start = System.currentTimeMillis();
 		while(System.currentTimeMillis()-start < timeout){
-			//TODO maybe replace this sleep with a notify / wait
-			try {
-				//wait(timeout - System.currentTimeMillis() + start);
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			PaxosMessage msg = getNextMessage();
+			System.out.println(timeout - System.currentTimeMillis() + start);
+			PaxosMessage msg = getNextMessage(timeout - System.currentTimeMillis() + start); 
+			// getNextMessage has a wait inside, so this is not a busy wait loop. 
+			// getNextMessage() blocks after timeout and doesn't proceed while getNextMessage(long) returns null if it fails
+			// RHS guaranteed > 0 ?
 			if(msg instanceof AliveMessage){
 				isAlive = true;
 				break;
 			}
 			else{
-				pendingMessages.add(msg);
+				if(msg!=null)
+					pendingMessages.add(msg);
 			}
 		}
 

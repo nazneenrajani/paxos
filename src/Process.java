@@ -19,6 +19,10 @@ public abstract class Process extends Thread {
 		return inbox.bdequeue();
 	}
 
+	PaxosMessage getNextMessage(long timeout){
+		return inbox.bdequeue(timeout);
+	}
+	
 	void sendMessage(ProcessId dst, PaxosMessage msg){
 		env.sendMessage(dst, msg);
 	}
