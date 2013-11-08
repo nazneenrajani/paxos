@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Replica extends Process {
 	ProcessId[] leaders;
-	ReplicaState state;
+	ReplicaState replicaState;
 	int slot_num = 1;
 	Map<Integer /* slot number */, Command> proposals = new HashMap<Integer, Command>();
 	Map<Integer /* slot number */, Command> decisions = new HashMap<Integer, Command>();
@@ -12,7 +12,8 @@ public class Replica extends Process {
 		this.me = me;
 		this.leaders = leaders;
 		env.addProc(me, this);
-		this.state = new ReplicaState();
+		this.replicaState = new ReplicaState();
+		replicaState.id=me;
 	}
 
 	void propose(Command c){
@@ -45,17 +46,19 @@ public class Replica extends Process {
 		String[] operation = c.op.toString().split(",");
 		switch(operation[2]){
 		case "D":
-			deposit(new BankAccount(Integer.parseInt(operation[0]),Integer.parseInt(operation[1])),Double.parseDouble(operation[3]));
+			System.out.println("Performing deposit");
+			deposit(Integer.parseInt(operation[0]),Integer.parseInt(operation[1]),Double.parseDouble(operation[3]));
+			System.out.println("Done with deposit");
 			break;
 		case "W":
-			withdraw(new BankAccount(Integer.parseInt(operation[0]),Integer.parseInt(operation[1])),Double.parseDouble(operation[3]));
+			withdraw(Integer.parseInt(operation[0]),Integer.parseInt(operation[1]),Double.parseDouble(operation[3]));
 			break;
 		case "I":
 			c.readOnly=true;
-			inquiry(new BankAccount(Integer.parseInt(operation[0]),Integer.parseInt(operation[1])));
+			inquiry(Integer.parseInt(operation[0]),Integer.parseInt(operation[1]));
 			break;
 		case "T":
-			transfer(new BankAccount(Integer.parseInt(operation[0]),Integer.parseInt(operation[1])),Double.parseDouble(operation[3]), new BankAccount(Integer.parseInt(operation[4]),Integer.parseInt(operation[5])));
+			transfer(Integer.parseInt(operation[0]),Integer.parseInt(operation[1]),Double.parseDouble(operation[3]), Integer.parseInt(operation[4]),Integer.parseInt(operation[5]));
 			break;
 		default:
 			//TODO
@@ -63,26 +66,26 @@ public class Replica extends Process {
 		
 	}
 
-	private void transfer(BankAccount bankAccount, double amount,
-			BankAccount bankAccount2) {
-		state.update(bankAccount.getACNumber(), bankAccount, amount, false);
-		state.update(bankAccount2.getACNumber(), bankAccount2, amount, true);
+	private void transfer(int clientid1, int acnumber1, double amount,
+			int clientid2, int acnumber2) {
+		replicaState.update(acnumber1, clientid1, amount, false, replicaState.state);
+		replicaState.update(acnumber2, clientid2, amount, true,replicaState.state);
 		
 	}
 
-	private void inquiry(BankAccount bankAccount) {
+	private void inquiry(int clientid, int acnumber) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private void withdraw(BankAccount bankAccount, double amount) {
-		state.update(bankAccount.getACNumber(), bankAccount, amount, false);
+	private void withdraw(int clientid, int acnumber, double amount) {
+		replicaState.update(acnumber, clientid, amount, false, replicaState.state);
 		
 	}
 
-	private void deposit(BankAccount bankAccount, double amount) {
-		state.update(bankAccount.getACNumber(), bankAccount, amount, true);
-		
+	private void deposit(int clientid, int acnumber, double amount) {
+		replicaState.update(acnumber, clientid, amount, true, replicaState.state);
+		System.out.println("In deposit");
 	}
 
 	public void body(){

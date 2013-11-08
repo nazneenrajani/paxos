@@ -3,27 +3,35 @@ import java.util.HashMap;
 
 public class ReplicaState {
 	HashMap<Integer,BankAccount> state;
-	
+	ProcessId id;
+
 	public ReplicaState(){
 		state = new HashMap<Integer,BankAccount>();
 	}
-	public void update(Integer ACNumber, BankAccount ba, double amount, boolean add){
-		for(int key:state.keySet()){
-			System.out.println(key+"     "+state.get(key).getBalance()+"   "+state.get(key).getClientID());
+	public void update(int ACNumber, int clientID, double amount, boolean add, HashMap<Integer,BankAccount> state){
+		System.out.println("In update");
+		if(!state.containsKey(ACNumber)){
+			BankAccount newAC = new BankAccount(clientID,ACNumber);
+			state.put(ACNumber, newAC);
+			operation(newAC,ACNumber,amount,add);
 		}
-		if(!state.containsKey(ACNumber))
-			state.put(ACNumber, ba);
 		else{
 			BankAccount temp = state.get(ACNumber);
-			if(add==true){
-				temp.setBalance(state.get(ACNumber).getBalance()+amount);
-				state.put(ACNumber, temp);
-				//System.out.println("updated state");
-			}
-			else{
-				temp.setBalance(state.get(ACNumber).getBalance()-amount);
-				state.put(ACNumber, temp);
-			}
+			operation(temp,ACNumber,amount,add);
+		}
+		for(int key:state.keySet()){
+			System.out.println(id+": "+key+"     "+state.get(key).getBalance()+"   "+state.get(key).getClientID());
+		}
+	}
+	public void operation(BankAccount temp, int ACNumber,double amount, boolean add){
+		if(add==true){
+			temp.setBalance(state.get(ACNumber).getBalance()+amount);
+			state.put(ACNumber, temp);
+			//System.out.println("updated state");
+		}
+		else{
+			temp.setBalance(state.get(ACNumber).getBalance()-amount);
+			state.put(ACNumber, temp);
 		}
 	}
 }

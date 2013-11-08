@@ -1,8 +1,8 @@
 
 public class BankAccount {
-	public static int clientID;
-	public static int ACNumber;
-	public static double balance;
+	public int clientID;
+	public int ACNumber;
+	public double balance=0.0;
 	
 	public BankAccount(int clientID, int ACNumber){
 		this.clientID=clientID;
@@ -13,8 +13,8 @@ public class BankAccount {
 		return clientID;
 	}
 
-	public void setClientID(int clientID) {
-		BankAccount.clientID = clientID;
+	public void setClientID(int clientId) {
+		clientID = clientId;
 	}
 
 	public int getACNumber() {
@@ -29,7 +29,7 @@ public class BankAccount {
 		return balance;
 	}
 
-	public void setBalance(double balance) {
-		BankAccount.balance = balance;
+	public void setBalance(double bal) {
+		balance = bal;
 	}
 }
