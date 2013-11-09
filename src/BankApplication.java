@@ -40,7 +40,8 @@ public class BankApplication extends Env {
 					ProcessId pid = new ProcessId("client:" + counter);
 					for (int r = 0; r < nReplicas; r++) {
 						sendMessage(replicas[r],
-							new RequestMessage(pid, new Command(pid, 0, sCurrentLine)));
+							new RequestMessage(pid, new Command(pid, counter, sCurrentLine)));
+						//TODO: request id to be added - changed to counter?
 					}
 					counter++;
 			}

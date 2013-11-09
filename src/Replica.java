@@ -6,7 +6,8 @@ public class Replica extends Process {
 	int slot_num = 1;
 	Map<Integer /* slot number */, Command> proposals = new HashMap<Integer, Command>();
 	Map<Integer /* slot number */, Command> decisions = new HashMap<Integer, Command>();
-
+	//TODO handle decisions in leader for read-only
+	
 	public Replica(Env env, ProcessId me, ProcessId[] leaders){
 		this.env = env;
 		this.me = me;

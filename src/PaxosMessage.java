@@ -6,8 +6,9 @@ public class PaxosMessage {
 
 class P1aMessage extends PaxosMessage {
 	BallotNumber ballot_number;
-	P1aMessage(ProcessId src, BallotNumber ballot_number){
-		this.src = src; this.ballot_number = ballot_number;
+	double lease;
+	P1aMessage(ProcessId src, BallotNumber ballot_number, double lease){
+		this.src = src; this.ballot_number = ballot_number; lease = 0.0;
 }	}
 class P1bMessage extends PaxosMessage {
 	BallotNumber ballot_number; Set<PValue> accepted;
