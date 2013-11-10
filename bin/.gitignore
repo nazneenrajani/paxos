@@ -25,11 +25,11 @@
 /ProcessId.class
 /ProposeMessage.class
 /Queue.class
-/Replica.class
-/ReplicaState.class
-/RequestMessage.class
-/ReplicaNumMessage.class
-/ReadOnlyResponseMessage.class
 /ReadOnlyDecisionMessage.class
 /ReadOnlyPreemptedMessage.class
 /ReadOnlyProposeMessage.class
+/Replica.class
+/ReplicaNumMessage.class
+/ReplicaState.class
+/RequestMessage.class
+/Scout.class

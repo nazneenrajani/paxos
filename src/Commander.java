@@ -58,6 +58,7 @@ public class Commander extends Process {
 				//new AliveReplicaFinder(env, new ProcessId("AliveReplicaFinder:" + me), me, replicas);
 				//ReplicaNumMessage m= (ReplicaNumMessage) getNextMessage();
 				//sendMessage(m.replicaId, new ReadOnlyDecisionMessage(me, command));
+				System.out.println("Sending Decision message");
 				sendMessage(replicas[0], new ReadOnlyDecisionMessage(me, command));
 			}
 			else{
