@@ -121,7 +121,8 @@ public class Replica extends Process {
 				}
 			}
 			else if (msg instanceof ReadOnlyDecisionMessage) {
-				ReadOnlyDecisionMessage m = (ReadOnlyDecisionMessage) msg;				
+				ReadOnlyDecisionMessage m = (ReadOnlyDecisionMessage) msg;
+				System.out.println("" + me + ": perform " + m.command);
 				performOperation(m.command);
 			}
 			else {

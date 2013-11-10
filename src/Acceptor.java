@@ -16,26 +16,12 @@ public class Acceptor extends Process {
 			PaxosMessage msg = getNextMessage();
 
 			if (msg instanceof P1aMessage) {
-				//TODO lease check in message
 				P1aMessage m = (P1aMessage) msg;
-				if(m.lease>0){
-					double start = System.currentTimeMillis();
 					if (ballot_number == null ||
 							ballot_number.compareTo(m.ballot_number) < 0) {
 						ballot_number = m.ballot_number;
 					}
 					sendMessage(m.src, new P1bMessage(me, ballot_number, new HashSet<PValue>(accepted)));
-					while(System.currentTimeMillis()-start <= m.lease){
-						; //TODO: waiting for lease time to expire, what to do ?
-					}
-				}
-				else{
-					if (ballot_number == null ||
-							ballot_number.compareTo(m.ballot_number) < 0) {
-						ballot_number = m.ballot_number;
-					}
-					sendMessage(m.src, new P1bMessage(me, ballot_number, new HashSet<PValue>(accepted)));
-				}
 			}
 			else if (msg instanceof P2aMessage) {
 				P2aMessage m = (P2aMessage) msg;
