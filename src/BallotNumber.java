@@ -1,10 +1,13 @@
 public class BallotNumber implements Comparable {
 	int round;
 	ProcessId leader_id;
-
+	long lease_time;
+	long start_lease;
+	
 	public BallotNumber(int round, ProcessId leader_id){
 		this.round = round;
 		this.leader_id = leader_id;
+		this.lease_time=5000L;
 	}
 
 	public boolean equals(Object other){

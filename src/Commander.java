@@ -52,32 +52,14 @@ public class Commander extends Process {
 			}
 		}
 		else{
-			P2aMessage m2 = new P2aMessage(me, ballot_number, slot_number, command);
-			Set<ProcessId> waitfor = new HashSet<ProcessId>();
-			for (ProcessId a: acceptors) {
-				sendMessage(a, m2);
-				waitfor.add(a);
+			if(System.currentTimeMillis()-ballot_number.start_lease < ballot_number.lease_time){
+				sendMessage(replicas[0], new ReadOnlyDecisionMessage(me, command));
 			}
-
-			while (2 * waitfor.size() >= acceptors.length) {
-				PaxosMessage msg = getNextMessage();
-
-				if (msg instanceof P2bMessage) {
-					P2bMessage m = (P2bMessage) msg;
-
-					if (ballot_number.equals(m.ballot_number)) {
-						if (waitfor.contains(m.src)) {
-							waitfor.remove(m.src);
-						}
-					}
-					else {
-						sendMessage(leader, new PreemptedMessage(me, m.ballot_number));
-						return;
-					}
-				}
+			else{
+				sendMessage(leader, new ReadOnlyPreemptedMessage(me, ballot_number,command));
 			}
 			//TODO: maintain list of dead replicas
-			sendMessage(replicas[0], new DecisionMessage(me, slot_number, command));
+			
 		}
 	}
 }

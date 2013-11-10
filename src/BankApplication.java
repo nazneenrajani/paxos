@@ -37,10 +37,14 @@ public class BankApplication extends Env {
 			br = new BufferedReader(new FileReader(args[0]));
 			while ((sCurrentLine = br.readLine()) != null) {
 				System.out.println(sCurrentLine);
+				String[] c = sCurrentLine.split(",");
+				boolean readOnly=false;
+				if(c[2].equals("I"))
+					readOnly=true;
 					ProcessId pid = new ProcessId("client:" + counter);
 					for (int r = 0; r < nReplicas; r++) {
 						sendMessage(replicas[r],
-							new RequestMessage(pid, new Command(pid, counter, sCurrentLine)));
+							new RequestMessage(pid, new Command(pid, counter, sCurrentLine, readOnly)));
 						//TODO: request id to be added - changed to counter?
 					}
 					counter++;
