@@ -30,3 +30,6 @@
 /RequestMessage.class
 /ReplicaNumMessage.class
 /ReadOnlyResponseMessage.class
+/ReadOnlyDecisionMessage.class
+/ReadOnlyPreemptedMessage.class
+/ReadOnlyProposeMessage.class

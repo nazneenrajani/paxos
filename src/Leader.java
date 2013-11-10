@@ -6,7 +6,8 @@ public class Leader extends Process {
 	BallotNumber ballot_number;
 	boolean active = false;
 	Map<Integer, Command> proposals = new HashMap<Integer, Command>();
-
+	Set<Command> readOnly = new HashSet<Command>();
+	
 	public Leader(Env env, ProcessId me, ProcessId[] acceptors,
 										ProcessId[] replicas){
 		this.env = env;
@@ -36,6 +37,14 @@ public class Leader extends Process {
 					}
 				}
 			}
+			else if (msg instanceof ReadOnlyProposeMessage) {
+				ReadOnlyProposeMessage m = (ReadOnlyProposeMessage) msg;
+					if (active) {
+						new Commander(env,
+							new ProcessId("commander:" + me + ":" + ballot_number+":"+"ReadOnly"+":"+m.command.req_id),
+							me, acceptors, replicas, ballot_number,-1, m.command);
+					}
+			}
 			else if (msg instanceof AdoptedMessage) {
 				AdoptedMessage m = (AdoptedMessage) msg;
 
@@ -54,6 +63,11 @@ public class Leader extends Process {
 							new ProcessId("commander:" + me + ":" + ballot_number + ":" + sn),
 							me, acceptors, replicas, ballot_number, sn, proposals.get(sn));
 					}
+					for (Command c : readOnly) {
+						new Commander(env,
+							new ProcessId("commander:" + me + ":" + ballot_number + ":" +"ReadOnly"+":"+c.req_id),
+							me, acceptors, replicas, ballot_number, -1, c);
+					}
 					active = true;
 				}
 			}
@@ -67,7 +81,17 @@ public class Leader extends Process {
 					active = false;
 				}
 			}
-
+			
+			else if (msg instanceof ReadOnlyPreemptedMessage) {
+				ReadOnlyPreemptedMessage m = (ReadOnlyPreemptedMessage) msg;
+				readOnly.add(m.command);
+				if (ballot_number.compareTo(m.ballot_number) < 0) {
+					ballot_number = new BallotNumber(m.ballot_number.round + 1, me);
+					new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
+						me, acceptors, ballot_number);
+					active = false;
+				}
+			}
 			else {
 				System.err.println("Leader: unknown msg type");
 			}

@@ -2,10 +2,11 @@ public class AliveReplicaFinder extends Process {
 	ProcessId leader;
 	ProcessId[] replicas;
 
-	public AliveReplicaFinder(Env env, ProcessId me, ProcessId leader){
+	public AliveReplicaFinder(Env env, ProcessId me, ProcessId leader, ProcessId[] replicas){
 		this.env = env;
 		this.me = me;
 		this.leader = leader;
+		this.replicas = replicas;
 		env.addProc(me, this);
 	}
 

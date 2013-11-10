@@ -9,7 +9,6 @@ public class ReplicaState {
 		state = new HashMap<Integer,BankAccount>();
 	}
 	public void update(int ACNumber, int clientID, double amount, boolean add, HashMap<Integer,BankAccount> state){
-		System.out.println("In update");
 		if(!state.containsKey(ACNumber)){
 			BankAccount newAC = new BankAccount(clientID,ACNumber);
 			state.put(ACNumber, newAC);
@@ -19,9 +18,11 @@ public class ReplicaState {
 			BankAccount temp = state.get(ACNumber);
 			operation(temp,ACNumber,amount,add);
 		}
+		/*
 		for(int key:state.keySet()){
 			System.out.println(id+": "+key+"     "+state.get(key).getBalance()+"   "+state.get(key).getClientID());
 		}
+		*/
 	}
 	public void operation(BankAccount temp, int ACNumber,double amount, boolean add){
 		if(add==true){
