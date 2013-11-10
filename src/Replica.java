@@ -19,6 +19,7 @@ public class Replica extends Process {
 
 	void propose(Command c){
 		if (!decisions.containsValue(c)) {
+			//TODO should we propose when command is read only
 			for (int s = 1;; s++) {
 				if (!proposals.containsKey(s) && !decisions.containsKey(s)) {
 					proposals.put(s, c);
@@ -101,6 +102,7 @@ public class Replica extends Process {
 
 			else if (msg instanceof DecisionMessage) {
 				DecisionMessage m = (DecisionMessage) msg;
+				//TODO handle case when m.command is read_only. Do not put in decisions
 				decisions.put(m.slot_number, m.command);
 				for (;;) {
 					Command c = decisions.get(slot_num);
@@ -113,6 +115,11 @@ public class Replica extends Process {
 					}
 					perform(c);
 				}
+			}
+			else if (msg instanceof FailureDetectMessage){
+				FailureDetectMessage m = (FailureDetectMessage) msg;
+				System.out.println(me + " received FailureDetect from "+m.src);
+				sendMessage(m.src, new AliveMessage(me));
 			}
 			else {
 				System.err.println("Replica: unknown msg type");

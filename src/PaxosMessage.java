@@ -54,12 +54,16 @@ class ProposeMessage extends PaxosMessage {
 
 // New message classes
 class FailureDetectMessage extends PaxosMessage {
-	Command command;
 	public FailureDetectMessage(ProcessId src){
 		this.src = src;
 }	}
 class AliveMessage extends PaxosMessage {
-	Command command;
 	public AliveMessage(ProcessId src){
 		this.src = src;
+}	}
+class ReplicaNumMessage extends PaxosMessage {
+	ProcessId replicaId;
+	public ReplicaNumMessage(ProcessId src, ProcessId replicaId){
+		this.src = src;
+		this.replicaId = replicaId;
 }	}

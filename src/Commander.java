@@ -77,7 +77,12 @@ public class Commander extends Process {
 				}
 			}
 			//TODO: maintain list of dead replicas
-			sendMessage(replicas[0], new DecisionMessage(me, slot_number, command));
+			//TODO maybe make this process persistent, invoke in leader, and just ask it which replica is alive
+			new AliveReplicaFinder(env, new ProcessId("AliveReplicaFinder:" + me), me);
+			ReplicaNumMessage m= (ReplicaNumMessage) getNextMessage();
+			sendMessage(m.replicaId, new DecisionMessage(me, slot_number, command));
+			
+			//sendMessage(replicas[0], new DecisionMessage(me, slot_number, command));
 		}
 	}
 }
