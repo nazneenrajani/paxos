@@ -2,7 +2,8 @@ import java.util.*;
 
 public class Env {
 	Map<ProcessId, Process> procs = new HashMap<ProcessId, Process>();
-	public final static int nAcceptors = 3, nReplicas = 2, nLeaders = 2, nRequests = 10;
+	public static int nAcceptors = 3, nReplicas = 2, nLeaders = 2;
+	public static int nRequests = 10;
 
 	synchronized void sendMessage(ProcessId dst, PaxosMessage msg){
 		Process p = procs.get(dst);
@@ -17,6 +18,12 @@ public class Env {
 	}
 
 	synchronized void removeProc(ProcessId pid){
+		procs.remove(pid);
+	}
+	
+	synchronized void killProc(ProcessId pid){
+		System.out.println("Killing process "+pid);
+		procs.get(pid).stop(); //TODO replace with safer code
 		procs.remove(pid);
 	}
 
