@@ -11,8 +11,11 @@ import java.io.IOException;
  *
  */
 public class BankApplication extends Env {
+	
 	@Override
 	void run(String[] args){
+		nLeaders = 5;
+		
 		ProcessId[] acceptors = new ProcessId[nAcceptors];
 		ProcessId[] replicas = new ProcessId[nReplicas];
 		ProcessId[] leaders = new ProcessId[nLeaders];

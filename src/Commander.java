@@ -55,12 +55,11 @@ public class Commander extends Process {
 
 			if(System.currentTimeMillis()-ballot_number.start_lease < ballot_number.lease_time){
 				//TODO maybe make this process persistent, invoke in leader, and just ask it which replica is alive
-				new AliveReplicaFinder(env, new ProcessId("AliveReplicaFinder:" + me), me, replicas);
-				ReplicaNumMessage m= (ReplicaNumMessage) getNextMessage();
-				sendMessage(m.replicaId, new ReadOnlyDecisionMessage(me, command));
-				System.out.println("Sending Decision message");
-				//sendMessage(replicas[0], new ReadOnlyDecisionMessage(me, command));
-				sendMessage(leader, new RemoveReadOnly(me, command));
+				//new AliveReplicaFinder(env, new ProcessId("AliveReplicaFinder:" + me), me, replicas);
+				//ReplicaNumMessage m= (ReplicaNumMessage) getNextMessage();
+				//sendMessage(m.replicaId, new ReadOnlyDecisionMessage(me, command));
+				
+				sendMessage(replicas[0], new ReadOnlyDecisionMessage(me, command));
 			}
 			else{
 				sendMessage(leader, new ReadOnlyPreemptedMessage(me, ballot_number,command));

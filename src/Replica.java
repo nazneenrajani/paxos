@@ -106,6 +106,7 @@ public class Replica extends Process {
 		}
 
 		private void inquiry(int clientid, int acnumber, int req_id) {
+			System.out.print("At " + me +", ");
 			if(!replicaState.state.containsKey(acnumber))
 				System.out.println("The AC number: "+acnumber+" for client: "+clientid+" does not exist");
 			else
@@ -131,6 +132,7 @@ public class Replica extends Process {
 					propose(m.command);
 				}
 				else if (msg instanceof DecisionMessage) {
+					//printSlots();
 					DecisionMessage m = (DecisionMessage) msg;
 					decisions.put(m.slot_number, m.command);
 					for (;;) {
@@ -147,20 +149,29 @@ public class Replica extends Process {
 				}
 				else if (msg instanceof FailureDetectMessage) {
 					FailureDetectMessage m = (FailureDetectMessage) msg;
-					System.out.println(me + " received FailureDetect from "+m.src);
+					//System.out.println(me + " received FailureDetect from "+m.src);
 					sendMessage(m.src, new AliveMessage(me));
 				}
 				else if (msg instanceof ReadOnlyDecisionMessage) {
 					ReadOnlyDecisionMessage m = (ReadOnlyDecisionMessage) msg;
 					System.out.println("" + me + ": perform " + m.command);
+					for(ProcessId l:leaders){
+						sendMessage(l, new RemoveReadOnly(me, m.command));
+					}
 					
 					incomplete_readOnly.add(m.command);
 					performIncompleteReadOnly();
-				
 				}
 				else {
 					System.err.println("Replica: unknown msg type");
 				}
 			}
+		}
+		
+		private void printSlots(){
+			System.out.print("Slots at "+me+" ");
+			for(int s=1;s<slot_num;s++)
+				System.out.print(s+":"+decisions.get(s)+",");
+			System.out.println("");
 		}
 	}

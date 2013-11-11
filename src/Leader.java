@@ -7,6 +7,21 @@ public class Leader extends Process {
 	boolean active = false;
 	Map<Integer, Command> proposals = new HashMap<Integer, Command>();
 	Set<Command> readOnly = new HashSet<Command>();
+	
+	Boolean doFailureDetect = false;
+	Boolean doReadOnly = true; //TODO implement here?
+
+	private long timeout = 1000L;
+	private long additiveDecreaseFactor = 100L;
+	private double multiplicativeIncreaseFactor = 1.1;
+
+	public void increaseTimeout(){
+		timeout *= multiplicativeIncreaseFactor;
+	}
+
+	public void decreaseTimeout(){
+		timeout -= additiveDecreaseFactor;
+	}
 
 	public Leader(Env env, ProcessId me, ProcessId[] acceptors,
 			ProcessId[] replicas){
@@ -38,17 +53,18 @@ public class Leader extends Process {
 				}
 			}
 			else if (msg instanceof ReadOnlyProposeMessage) {
-				System.out.println("Received ReadOnlyPropose at "+me);
 				ReadOnlyProposeMessage m = (ReadOnlyProposeMessage) msg;
 				readOnly.add(m.command);
 				if (active) {
-					System.out.println(me + " is active at ReadOnlyPropose");
 					new Commander(env,
 							new ProcessId("commander:" + me + ":" + ballot_number+":"+"ReadOnly"+":"+m.command.req_id),
 							me, acceptors, replicas, ballot_number,-1, m.command);
 				}
 			}
 			else if (msg instanceof AdoptedMessage) {
+				decreaseTimeout();
+
+				System.out.println(me+ " is adopted as leader");
 				AdoptedMessage m = (AdoptedMessage) msg;
 
 				if (ballot_number.equals(m.ballot_number)) {
@@ -76,16 +92,24 @@ public class Leader extends Process {
 			}
 
 			else if (msg instanceof PreemptedMessage) {
+				increaseTimeout();
+
 				PreemptedMessage m = (PreemptedMessage) msg;
+				System.out.println(me + " is preempted. Active leader is "+m.ballot_number.leader_id);
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
-					ballot_number = new BallotNumber(m.ballot_number.round + 1, me);
-					new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
-							me, acceptors, ballot_number);
-					active = false;
+					if(!isAlive(m.ballot_number.leader_id)){
+						System.out.println(me + " Prempting "+m.ballot_number.leader_id);
+						ballot_number = new BallotNumber(m.ballot_number.round + 1, me);
+						new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
+								me, acceptors, ballot_number);
+						active = false;
+					}
 				}
 			}
 
 			else if (msg instanceof ReadOnlyPreemptedMessage) {
+				System.out.println(me + "was preempted due to lease expiry");
+				
 				ReadOnlyPreemptedMessage m = (ReadOnlyPreemptedMessage) msg;
 				readOnly.add(m.command);
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
@@ -99,9 +123,55 @@ public class Leader extends Process {
 				RemoveReadOnly m = (RemoveReadOnly) msg;
 				readOnly.remove(m.command);
 			}
+			else if (msg instanceof FailureDetectMessage) {
+				FailureDetectMessage m = (FailureDetectMessage) msg;
+				//System.out.println(me + " received FailureDetect from "+m.src);
+				sendMessage(m.src, new AliveMessage(me));
+			}
+			else if (msg instanceof AliveMessage){
+				//drop
+			}
 			else {
-				System.err.println("Leader: unknown msg type");
+				System.err.println("Leader: unknown msg type "+ msg);
 			}
 		}
+	}
+	
+	private boolean isAlive(ProcessId leader_id) {
+		if(!doFailureDetect)
+			return true;
+		PaxosMessage pxm = new FailureDetectMessage(me);
+		sendMessage(leader_id, pxm);
+
+		Boolean isAlive = false;
+
+		System.out.println("Process " + me + " waiting for "+leader_id);
+
+		LinkedList<PaxosMessage> pendingMessages = new LinkedList<PaxosMessage>(); 
+		Long start = System.currentTimeMillis();
+		while(System.currentTimeMillis()-start < timeout){
+			PaxosMessage msg = getNextMessage(timeout - System.currentTimeMillis() + start); 
+			// getNextMessage has a wait inside, so this is not a busy wait loop. 
+			// getNextMessage() blocks after timeout and doesn't proceed while getNextMessage(long) returns null if it fails
+			// RHS guaranteed > 0 ?
+			if(msg instanceof AliveMessage){
+				isAlive = true;
+				break;
+			}
+			else{
+				if(msg!=null)
+					pendingMessages.add(msg);
+			}
+		}
+
+		for(PaxosMessage msg:pendingMessages){
+			deliver(msg);
+		}
+
+		if(isAlive)
+			System.out.println(leader_id + " detected alive at timeout "+ timeout + " by " +me);
+		else
+			System.out.println(leader_id + " detected dead at timeout "+ timeout  + " by " +me);
+		return isAlive;
 	}
 }

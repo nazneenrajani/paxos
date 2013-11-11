@@ -98,7 +98,7 @@ public class LeaderWithFailureDetector extends Leader {
 			}
 			else if (msg instanceof FailureDetectMessage){
 				FailureDetectMessage m = (FailureDetectMessage) msg;
-				System.out.println(me + " received FailureDetect from "+m.src);
+				//System.out.println(me + " received FailureDetect from "+m.src);
 				sendMessage(m.src, new AliveMessage(me));
 			}
 			else {
