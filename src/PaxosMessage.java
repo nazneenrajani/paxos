@@ -81,4 +81,9 @@ class ReadOnlyPreemptedMessage extends PaxosMessage {
 	ReadOnlyPreemptedMessage(ProcessId src, BallotNumber ballot_number, Command c){
 		this.src = src; this.ballot_number = ballot_number; this.command = c;
 	}	}
-
+class RemoveReadOnly extends PaxosMessage{
+	Command command;
+	RemoveReadOnly(ProcessId src, Command c) {
+		this.src=src;this.command=c;
+	}
+}

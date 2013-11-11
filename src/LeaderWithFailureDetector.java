@@ -82,10 +82,6 @@ public class LeaderWithFailureDetector extends Leader {
 					}
 					active = true;
 				}
-				else 
-				{
-					//TODO Bad? Should not happen?
-				}
 			}
 			else if (msg instanceof PreemptedMessage) {
 				increaseTimeout();
@@ -96,7 +92,7 @@ public class LeaderWithFailureDetector extends Leader {
 						ballot_number = new BallotNumber(m.ballot_number.round + 1, me);
 						new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
 								me, acceptors, ballot_number);
-						active = false; //TODO should this be outside?
+						active = false;
 					}
 				}
 			}

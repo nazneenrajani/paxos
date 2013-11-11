@@ -44,7 +44,6 @@ public class Scout extends Process {
 				System.err.println("Scout: unexpected msg");
 			}
 		}
-		//TODO: where to set start_lease
 		ballot_number.start_lease=System.currentTimeMillis();
 		sendMessage(leader, new AdoptedMessage(me, ballot_number, pvalues));
 	}

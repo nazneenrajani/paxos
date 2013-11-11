@@ -45,7 +45,6 @@ public class BankApplication extends Env {
 					for (int r = 0; r < nReplicas; r++) {
 						sendMessage(replicas[r],
 							new RequestMessage(pid, new Command(pid, counter, sCurrentLine, readOnly)));
-						//TODO: request id to be added - changed to counter?
 					}
 					counter++;
 			}

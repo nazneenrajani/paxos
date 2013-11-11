@@ -4,7 +4,8 @@ import java.util.HashMap;
 public class ReplicaState {
 	HashMap<Integer,BankAccount> state;
 	ProcessId id;
-
+	int command_number=0;
+	
 	public ReplicaState(){
 		state = new HashMap<Integer,BankAccount>();
 	}
