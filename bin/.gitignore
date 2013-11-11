@@ -33,3 +33,7 @@
 /ReplicaState.class
 /RequestMessage.class
 /Scout.class
+/RemoveReadOnly.class
+/minReplicaNumMessage.class
+/MinReplicaMessage.class
+/GetMinReplicaMessage.class

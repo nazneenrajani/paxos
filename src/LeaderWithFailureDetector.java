@@ -57,7 +57,7 @@ public class LeaderWithFailureDetector extends Leader {
 					if (active) {
 						new Commander(env,
 								new ProcessId("commander:" + me + ":" + ballot_number + ":" + m.slot_number),
-								me, acceptors, replicas, ballot_number, m.slot_number, m.command);
+								me, null, acceptors, replicas, ballot_number, m.slot_number, m.command);
 					}
 				}
 			}
@@ -78,7 +78,7 @@ public class LeaderWithFailureDetector extends Leader {
 					for (int sn : proposals.keySet()) {
 						new Commander(env,
 								new ProcessId("commander:" + me + ":" + ballot_number + ":" + sn),
-								me, acceptors, replicas, ballot_number, sn, proposals.get(sn));
+								me, null, acceptors, replicas, ballot_number, sn, proposals.get(sn));
 					}
 					active = true;
 				}
@@ -98,7 +98,7 @@ public class LeaderWithFailureDetector extends Leader {
 			}
 			else if (msg instanceof FailureDetectMessage){
 				FailureDetectMessage m = (FailureDetectMessage) msg;
-				System.out.println(me + " received FailureDetect from "+m.src);
+				//System.out.println(me + " received FailureDetect from "+m.src);
 				sendMessage(m.src, new AliveMessage(me));
 			}
 			else {
