@@ -1,4 +1,4 @@
-public class Command {
+public class Command implements Comparable<Command>{
 	ProcessId client;
 	int req_id;
 	Object op;
@@ -25,4 +25,9 @@ public class Command {
 	public String toString(){
 		return "Command(" + client + ", " + req_id + ", " + op + ")";
 	}
+	
+	// Added 
+	public int compareTo(Command c) {
+	    return this.req_id - c.req_id;
+	} 
 }

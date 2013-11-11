@@ -2,18 +2,20 @@ import java.util.*;
 
 public class Commander extends Process {
 	ProcessId leader;
+	ProcessId arf;
 	ProcessId[] acceptors, replicas;
 	BallotNumber ballot_number;
 	int slot_number;
 	Command command;
 
-	public Commander(Env env, ProcessId me, ProcessId leader, ProcessId[] acceptors,
+	public Commander(Env env, ProcessId me, ProcessId leader, ProcessId arf, ProcessId[] acceptors,
 			ProcessId[] replicas, BallotNumber ballot_number, int slot_number, Command command){
 		this.env = env;
 		this.me = me;
 		this.acceptors = acceptors;
 		this.replicas = replicas;
 		this.leader = leader;
+		this.arf = arf;
 		this.ballot_number = ballot_number;
 		this.slot_number = slot_number;
 		this.command = command;
@@ -54,12 +56,11 @@ public class Commander extends Process {
 		else{
 
 			if(System.currentTimeMillis()-ballot_number.start_lease < ballot_number.lease_time){
-				//TODO maybe make this process persistent, invoke in leader, and just ask it which replica is alive
-				//new AliveReplicaFinder(env, new ProcessId("AliveReplicaFinder:" + me), me, replicas);
-				//ReplicaNumMessage m= (ReplicaNumMessage) getNextMessage();
-				//sendMessage(m.replicaId, new ReadOnlyDecisionMessage(me, command));
+				sendMessage(arf, new GetMinReplicaMessage(me));
+				MinReplicaMessage m= (MinReplicaMessage) getNextMessage();
+				sendMessage(m.replicaId, new ReadOnlyDecisionMessage(me, command));
 				
-				sendMessage(replicas[0], new ReadOnlyDecisionMessage(me, command));
+				//sendMessage(replicas[0], new ReadOnlyDecisionMessage(me, command));
 			}
 			else{
 				sendMessage(leader, new ReadOnlyPreemptedMessage(me, ballot_number,command));

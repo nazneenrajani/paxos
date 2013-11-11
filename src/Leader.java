@@ -35,7 +35,9 @@ public class Leader extends Process {
 
 	public void body(){
 		System.out.println("Here I am: " + me);
-
+		
+		ProcessId arf = new ProcessId("AliveReplicaFinder:" + me);
+		new AliveReplicaFinder(env, arf, replicas);
 		new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
 				me, acceptors, ballot_number);
 		for (;;) {
@@ -48,7 +50,7 @@ public class Leader extends Process {
 					if (active) {
 						new Commander(env,
 								new ProcessId("commander:" + me + ":" + ballot_number + ":" + m.slot_number),
-								me, acceptors, replicas, ballot_number, m.slot_number, m.command);
+								me, arf, acceptors, replicas, ballot_number, m.slot_number, m.command);
 					}
 				}
 			}
@@ -58,7 +60,7 @@ public class Leader extends Process {
 				if (active) {
 					new Commander(env,
 							new ProcessId("commander:" + me + ":" + ballot_number+":"+"ReadOnly"+":"+m.command.req_id),
-							me, acceptors, replicas, ballot_number,-1, m.command);
+							me, arf, acceptors, replicas, ballot_number,-1, m.command);
 				}
 			}
 			else if (msg instanceof AdoptedMessage) {
@@ -80,12 +82,12 @@ public class Leader extends Process {
 					for (int sn : proposals.keySet()) {
 						new Commander(env,
 								new ProcessId("commander:" + me + ":" + ballot_number + ":" + sn),
-								me, acceptors, replicas, ballot_number, sn, proposals.get(sn));
+								me, arf, acceptors, replicas, ballot_number, sn, proposals.get(sn));
 					}
 					for (Command c : readOnly) {
 						new Commander(env,
 								new ProcessId("commander:" + me + ":" + ballot_number + ":" +"ReadOnly"+":"+c.req_id),
-								me, acceptors, replicas, ballot_number, -1, c);
+								me, arf, acceptors, replicas, ballot_number, -1, c);
 					}
 					active = true;
 				}

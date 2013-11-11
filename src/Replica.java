@@ -7,7 +7,7 @@ public class Replica extends Process {
 	Map<Integer /* slot number */, Command> proposals = new HashMap<Integer, Command>();
 	Map<Integer /* slot number */, Command> decisions = new HashMap<Integer, Command>();
 	ArrayList<Boolean> completed_requests = new ArrayList<Boolean>();
-	Set<Command> incomplete_readOnly = new HashSet<Command>();
+	Set<Command> incomplete_readOnly = new TreeSet<Command>();
 
 	public Replica(Env env, ProcessId me, ProcessId[] leaders){
 		this.env = env;
@@ -61,7 +61,9 @@ public class Replica extends Process {
 	}
 
 	private void performIncompleteReadOnly() {
-		//TODO incomplete_.. should be a sorted TreeSet
+		if(incomplete_readOnly.size()>0) 
+			System.out.println("Pending ReadOnly requests at "+ me + " :" +incomplete_readOnly);
+		
 		Iterator<Command> it = incomplete_readOnly.iterator(); 
 		while(it.hasNext()){
 			Command cr = it.next();
@@ -158,7 +160,7 @@ public class Replica extends Process {
 					for(ProcessId l:leaders){
 						sendMessage(l, new RemoveReadOnly(me, m.command));
 					}
-					
+					// TODO handle sending old state to already performed cids
 					incomplete_readOnly.add(m.command);
 					performIncompleteReadOnly();
 				}

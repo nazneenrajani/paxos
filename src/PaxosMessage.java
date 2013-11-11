@@ -60,11 +60,15 @@ class AliveMessage extends PaxosMessage {
 	public AliveMessage(ProcessId src){
 		this.src = src;
 }	}
-class ReplicaNumMessage extends PaxosMessage {
+class MinReplicaMessage extends PaxosMessage {
 	ProcessId replicaId;
-	public ReplicaNumMessage(ProcessId src, ProcessId replicaId){
+	public MinReplicaMessage(ProcessId src, ProcessId replicaId){
 		this.src = src;
 		this.replicaId = replicaId;
+}	}
+class GetMinReplicaMessage extends PaxosMessage {
+	public GetMinReplicaMessage(ProcessId src){
+		this.src = src;
 }	}
 class ReadOnlyDecisionMessage extends PaxosMessage {
 	ProcessId src; Command command;
