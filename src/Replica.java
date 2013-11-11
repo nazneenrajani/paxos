@@ -104,9 +104,9 @@ public class Replica extends Process {
 				RequestMessage m = (RequestMessage) msg;
 				propose(m.command);
 			}
-
 			else if (msg instanceof DecisionMessage) {
 				DecisionMessage m = (DecisionMessage) msg;
+				//TODO handle case when m.command is read_only. Do not put in decisions
 				decisions.put(m.slot_number, m.command);
 				for (;;) {
 					Command c = decisions.get(slot_num);
@@ -119,6 +119,11 @@ public class Replica extends Process {
 					}
 					perform(c);
 				}
+			}
+			else if (msg instanceof FailureDetectMessage) {
+				FailureDetectMessage m = (FailureDetectMessage) msg;
+				System.out.println(me + " received FailureDetect from "+m.src);
+				sendMessage(m.src, new AliveMessage(me));
 			}
 			else if (msg instanceof ReadOnlyDecisionMessage) {
 				ReadOnlyDecisionMessage m = (ReadOnlyDecisionMessage) msg;

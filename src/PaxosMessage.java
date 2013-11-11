@@ -53,15 +53,19 @@ class ProposeMessage extends PaxosMessage {
 
 // New message classes
 class FailureDetectMessage extends PaxosMessage {
-	Command command;
 	public FailureDetectMessage(ProcessId src){
 		this.src = src;
 	}	}
 class AliveMessage extends PaxosMessage {
-	Command command;
 	public AliveMessage(ProcessId src){
 		this.src = src;
-	}	}
+}	}
+class ReplicaNumMessage extends PaxosMessage {
+	ProcessId replicaId;
+	public ReplicaNumMessage(ProcessId src, ProcessId replicaId){
+		this.src = src;
+		this.replicaId = replicaId;
+}	}
 class ReadOnlyDecisionMessage extends PaxosMessage {
 	ProcessId src; Command command;
 	public ReadOnlyDecisionMessage(ProcessId src, Command command){
@@ -77,3 +81,4 @@ class ReadOnlyPreemptedMessage extends PaxosMessage {
 	ReadOnlyPreemptedMessage(ProcessId src, BallotNumber ballot_number, Command c){
 		this.src = src; this.ballot_number = ballot_number; this.command = c;
 	}	}
+

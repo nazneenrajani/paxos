@@ -38,8 +38,10 @@ public class Leader extends Process {
 				}
 			}
 			else if (msg instanceof ReadOnlyProposeMessage) {
+				System.out.println("Received ReadOnlyPropose at "+me);
 				ReadOnlyProposeMessage m = (ReadOnlyProposeMessage) msg;
 					if (active) {
+						System.out.println(me + " is active at ReadOnlyPropose");
 						new Commander(env,
 							new ProcessId("commander:" + me + ":" + ballot_number+":"+"ReadOnly"+":"+m.command.req_id),
 							me, acceptors, replicas, ballot_number,-1, m.command);
