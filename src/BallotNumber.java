@@ -1,7 +1,7 @@
 public class BallotNumber implements Comparable {
 	int round;
 	ProcessId leader_id;
-	long lease_time;
+	long lease_time=5000L;
 	long start_lease;
 	public long timeout = 1000L;
 	private long additiveDecreaseFactor = 100L;
@@ -11,13 +11,11 @@ public class BallotNumber implements Comparable {
 	public BallotNumber(int round, ProcessId leader_id){
 		this.round = round;
 		this.leader_id = leader_id;
-		this.lease_time=1000L;
 	}
 	
 	public BallotNumber(int round, ProcessId leader_id, long timeout){
 		this.round = round;
 		this.leader_id = leader_id;
-		this.lease_time=1000L;
 		this.timeout = timeout;
 	}
 

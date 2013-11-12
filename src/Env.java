@@ -23,7 +23,7 @@ public class Env {
 	
 	synchronized void killProc(ProcessId pid){
 		System.out.println("Killing process "+pid);
-		procs.get(pid).stop(); //TODO replace with safer code
+		procs.get(pid).stop();
 		procs.remove(pid);
 	}
 

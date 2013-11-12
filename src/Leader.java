@@ -6,7 +6,7 @@ public class Leader extends Process {
 	BallotNumber ballot_number;
 	boolean active = false;
 	Map<Integer, Command> proposals = new HashMap<Integer, Command>();
-	Set<Command> readOnly = new HashSet<Command>();
+	Set<Command> readOnly = new TreeSet<Command>();
 
 	Boolean doFailureDetect = null;
 
@@ -73,6 +73,12 @@ public class Leader extends Process {
 								me, arf, acceptors, replicas, ballot_number, sn, proposals.get(sn));
 					}
 					for (Command c : readOnly) {
+						System.out.println("readOnly "+readOnly);
+						try {
+							Thread.sleep(1000L);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 						new Commander(env,
 								new ProcessId("commander:" + me + ":" + ballot_number + ":" +"ReadOnly"+":"+c.req_id),
 								me, arf, acceptors, replicas, ballot_number, -1, c);
@@ -85,7 +91,7 @@ public class Leader extends Process {
 				ballot_number.increaseTimeout();
 
 				PreemptedMessage m = (PreemptedMessage) msg;
-				System.out.println(me + " is preempted. Active leader is "+m.ballot_number.leader_id);
+				//System.out.println(me + " is preempted. Active leader is "+m.ballot_number.leader_id);
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
 					if(!isAlive(m.ballot_number.leader_id, m.ballot_number.timeout)){
 						System.out.println(me + " Prempting "+m.ballot_number.leader_id);
@@ -99,8 +105,7 @@ public class Leader extends Process {
 
 			else if (msg instanceof ReadOnlyPreemptedMessage) {
 				ballot_number.increaseTimeout();
-				System.out.println(me + "was preempted due to lease expiry");
-
+				//System.out.println(me + "was preempted due to lease expiry");
 				ReadOnlyPreemptedMessage m = (ReadOnlyPreemptedMessage) msg;
 				readOnly.add(m.command);
 
@@ -115,7 +120,7 @@ public class Leader extends Process {
 			}
 			else if (msg instanceof RemoveReadOnly) {
 				RemoveReadOnly m = (RemoveReadOnly) msg;
-				readOnly.remove(m.command);
+				//readOnly.remove(m.command);
 			}
 			else if (msg instanceof FailureDetectMessage) {
 				FailureDetectMessage m = (FailureDetectMessage) msg;

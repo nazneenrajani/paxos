@@ -24,7 +24,7 @@ Test Cases:
 * Exercise 3: doFullPaxos = true. doFailureDetect = false
 * Exercise 5: doFullPaxos = true. doFailureDetect = true
 * ReadOnly: doFullPaxos = false. doFailureDetect = true/false. Set Lease time in BallotNumber.
-* Set doKill = true and put die() at suitable locations to enable dying of processes.
+* Set doKill = true to Kill Leader 4 and Kill Replica 0 after it has processed some readOnly commands
 
 Implementation details:
 -----------------------

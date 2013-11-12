@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Replica extends Process {
 	ProcessId[] leaders;
-	ProcessId activeLeader;
+	String activeLeader;
 	ReplicaState replicaState;
 	int slot_num = 1;
 	Map<Integer /* slot number */, Command> proposals = new HashMap<Integer, Command>();
@@ -51,11 +51,10 @@ public class Replica extends Process {
 				return;
 			}
 		}
-		System.out.println("" + me + ": perform " + c+". Active Leader= "+activeLeader); //TODO just get leader
+		System.out.println("" + me + ": perform " + c+". Active Leader= "+activeLeader);
 		performOperation(c,replicaState);
 		slot_num++;
-		if(slot_num==4)
-			die("replica:0");
+		//System.out.println("decisions "+decisions);
 		completed_requests.set(c.req_id,true);
 		updateCommandNumber();
 		performIncompleteReadOnly();
@@ -63,11 +62,16 @@ public class Replica extends Process {
 
 	private void updateCommandNumber(){
 		while(replicaState.command_number<completed_requests.size() && completed_requests.get(replicaState.command_number)==true)
+		{
 			replicaState.command_number++;
+			if(replicaState.command_number>4)
+				die("replica:0");
+		}
 		boolean isDone = true;
 		for(Command c: all_commands){
-			if(!(c.readOnly || (decisions.containsValue(c) && completed_requests.get(c.req_id))))
-				isDone=false;
+			if(!c.readOnly)
+				if(completed_requests.get(c.req_id)==false)
+					isDone=false;
 		}
 
 		if(((BankApplication) env).doFullPaxos && isDone)
@@ -116,7 +120,7 @@ public class Replica extends Process {
 			Command c = decisions.get(i);
 			performOperation(c, readOnlyState);
 		}
-		die("replica:1");
+		//die("replica:1");
 		performOperation(cr,readOnlyState);
 		served_requests.put(cr.req_id,-1);
 	}
@@ -150,9 +154,9 @@ public class Replica extends Process {
 
 	private void inquiry(int clientid, int acnumber, int req_id, ReplicaState rState) {
 		if(!rState.state.containsKey(acnumber))
-			System.out.println("At " + me +", " + "The AC number: "+acnumber+" for client: "+clientid+" does not exist");
+			System.err.println("At " + me +", " + "The AC number: "+acnumber+" for client: "+clientid+" does not exist");
 		else
-			System.out.println("At " + me +", " + "Inquiry command output: "+req_id+" for AC number: "+acnumber+" for client: "+clientid+" is "+rState.state.get(acnumber).balance);
+			System.err.println("At " + me +", " + "Inquiry command output: "+req_id+" for AC number: "+acnumber+" for client: "+clientid+" is "+rState.state.get(acnumber).balance);
 		System.out.flush();
 	}
 
@@ -169,6 +173,8 @@ public class Replica extends Process {
 		System.out.println("Here I am: " + me);
 		for (;;) {
 			PaxosMessage msg = getNextMessage();
+			if(msg==null)
+				performIncompleteReadOnly();
 
 			if (msg instanceof RequestMessage) {
 				RequestMessage m = (RequestMessage) msg;
@@ -178,8 +184,9 @@ public class Replica extends Process {
 				//printSlots();
 				DecisionMessage m = (DecisionMessage) msg;
 				decisions.put(m.slot_number, m.command);
-				//System.out.println("Received decision "+m+" from "+m.src);
-				activeLeader = m.src;
+				//System.out.println(me + " Received decision "+m+" from "+m.src);
+				String[] s = m.src.name.split(":");
+				activeLeader = s[1]+":"+s[2];
 				served_requests.put(m.command.req_id,m.slot_number);
 				for (;;) {
 					Command c = decisions.get(slot_num);
@@ -200,10 +207,12 @@ public class Replica extends Process {
 			}
 			else if (msg instanceof ReadOnlyDecisionMessage) {
 				ReadOnlyDecisionMessage m = (ReadOnlyDecisionMessage) msg;
+				//System.out.println(me + " Received readonlydecision "+m+" from "+m.src);
 				for(ProcessId l:leaders){
 					sendMessage(l, new RemoveReadOnly(me, m.command));
 				}
 				incomplete_readOnly.add(m.command);
+				//System.out.println("inc "+incomplete_readOnly);
 				performIncompleteReadOnly();
 			}
 			else {
