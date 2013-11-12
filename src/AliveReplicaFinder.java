@@ -20,7 +20,7 @@ public class AliveReplicaFinder extends Process {
 			AliveReplicas[i]=false;
 		}
 		while(true){
-			System.out.println(me +" "+ Arrays.toString(AliveReplicas));
+			//System.out.println(me +" "+ Arrays.toString(AliveReplicas));
 			for(ProcessId r:replicas){
 				sendMessage(r, new FailureDetectMessage(me));
 			}
@@ -54,6 +54,7 @@ public class AliveReplicaFinder extends Process {
 						}
 						continue;
 					}
+					System.out.println(minAliveReplica + " is the minAliveReplica");
 					sendMessage(msg.src, new MinReplicaMessage(me, minAliveReplica));
 				} else {
 					System.err.println("AliveReplicaFinder: Unknown message type "+msg);

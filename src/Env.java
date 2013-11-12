@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Env {
 	Map<ProcessId, Process> procs = new HashMap<ProcessId, Process>();
-	public static int nAcceptors = 3, nReplicas = 2, nLeaders = 2;
+	public static int nAcceptors = 5, nReplicas = 4, nLeaders = 2;
 	public static int nRequests = 10;
 
 	synchronized void sendMessage(ProcessId dst, PaxosMessage msg){

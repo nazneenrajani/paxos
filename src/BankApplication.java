@@ -11,6 +11,7 @@ import java.io.IOException;
  *
  */
 public class BankApplication extends Env {
+	boolean doFullPaxos = false;
 	
 	@Override
 	void run(String[] args){
@@ -43,7 +44,8 @@ public class BankApplication extends Env {
 				String[] c = sCurrentLine.split(",");
 				boolean readOnly=false;
 				if(c[2].equals("I"))
-					readOnly=true;
+					if(!doFullPaxos)
+						readOnly=true;
 					ProcessId pid = new ProcessId("client:" + counter);
 					for (int r = 0; r < nReplicas; r++) {
 						sendMessage(replicas[r],

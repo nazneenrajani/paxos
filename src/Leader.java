@@ -7,9 +7,8 @@ public class Leader extends Process {
 	boolean active = false;
 	Map<Integer, Command> proposals = new HashMap<Integer, Command>();
 	Set<Command> readOnly = new HashSet<Command>();
-	
+
 	Boolean doFailureDetect = false;
-	Boolean doReadOnly = true; //TODO implement here?
 
 	private long timeout = 1000L;
 	private long additiveDecreaseFactor = 100L;
@@ -35,7 +34,7 @@ public class Leader extends Process {
 
 	public void body(){
 		System.out.println("Here I am: " + me);
-		
+
 		ProcessId arf = new ProcessId("AliveReplicaFinder:" + me);
 		new AliveReplicaFinder(env, arf, replicas);
 		new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
@@ -45,6 +44,7 @@ public class Leader extends Process {
 
 			if (msg instanceof ProposeMessage) {
 				ProposeMessage m = (ProposeMessage) msg;
+				die("leader:3");
 				if (!proposals.containsKey(m.slot_number)) {
 					proposals.put(m.slot_number, m.command);
 					if (active) {
@@ -65,7 +65,7 @@ public class Leader extends Process {
 			}
 			else if (msg instanceof AdoptedMessage) {
 				decreaseTimeout();
-
+				die("leader:4");
 				System.out.println(me+ " is adopted as leader");
 				AdoptedMessage m = (AdoptedMessage) msg;
 
@@ -111,7 +111,7 @@ public class Leader extends Process {
 
 			else if (msg instanceof ReadOnlyPreemptedMessage) {
 				System.out.println(me + "was preempted due to lease expiry");
-				
+
 				ReadOnlyPreemptedMessage m = (ReadOnlyPreemptedMessage) msg;
 				readOnly.add(m.command);
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
@@ -138,10 +138,10 @@ public class Leader extends Process {
 			}
 		}
 	}
-	
+
 	private boolean isAlive(ProcessId leader_id) {
 		if(!doFailureDetect)
-			return true;
+			return false;
 		PaxosMessage pxm = new FailureDetectMessage(me);
 		sendMessage(leader_id, pxm);
 

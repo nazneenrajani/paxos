@@ -16,6 +16,7 @@ public class Acceptor extends Process {
 			PaxosMessage msg = getNextMessage();
 
 			if (msg instanceof P1aMessage) {
+				die("acceptor:0");
 				P1aMessage m = (P1aMessage) msg;
 					if (ballot_number == null ||
 							ballot_number.compareTo(m.ballot_number) < 0) {
@@ -24,6 +25,7 @@ public class Acceptor extends Process {
 					sendMessage(m.src, new P1bMessage(me, ballot_number, new HashSet<PValue>(accepted)));
 			}
 			else if (msg instanceof P2aMessage) {
+				die("acceptor:4");
 				P2aMessage m = (P2aMessage) msg;
 
 				if (ballot_number == null ||
