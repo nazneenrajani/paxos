@@ -9,6 +9,7 @@ public class Replica extends Process {
 	ArrayList<Boolean> completed_requests = new ArrayList<Boolean>();
 	Set<Command> incomplete_readOnly = new TreeSet<Command>();
 	Map<Integer /*cid*/,Integer /*slot number*/> served_requests = new HashMap<Integer,Integer>();
+	Set<Command> all_commands = new TreeSet<Command>();
 
 	public Replica(Env env, ProcessId me, ProcessId[] leaders){
 		this.env = env;
@@ -20,6 +21,7 @@ public class Replica extends Process {
 	}
 
 	void propose(Command c){
+		all_commands.add(c);
 		completed_requests.add(c.req_id,false);
 		if(c.readOnly==true){
 			for (ProcessId ldr: leaders) {
@@ -61,11 +63,21 @@ public class Replica extends Process {
 	private void updateCommandNumber(){
 		while(replicaState.command_number<completed_requests.size() && completed_requests.get(replicaState.command_number)==true)
 			replicaState.command_number++;
+		boolean isDone = true;
+		for(Command c: all_commands){
+			if(!(c.readOnly || (decisions.containsValue(c) && completed_requests.get(c.req_id))))
+				isDone=false;
+		}
+		
+		if(isDone)
+			System.out.println( me + " Served all requests except inquiries");
+		if(replicaState.command_number==completed_requests.size())
+			System.out.println( me + " Served all requests including inquiries");
 	}
 
 	private void performIncompleteReadOnly() {
 		//if(incomplete_readOnly.size()>0) 
-			//System.out.println("Pending ReadOnly requests at "+ me + " :" +incomplete_readOnly);
+		//	System.out.println("Pending ReadOnly requests at "+ me + " :" +incomplete_readOnly);
 
 		Iterator<Command> it = incomplete_readOnly.iterator(); 
 		while(it.hasNext()){
@@ -121,8 +133,6 @@ public class Replica extends Process {
 		default:
 			System.err.println("Unknown command type "+operation[2]);
 		}
-		if(decisions.size()==slot_num) //TODO
-			printSlots();
 	}
 
 	private void transfer(int clientid1, int acnumber1, double amount,
@@ -137,6 +147,7 @@ public class Replica extends Process {
 			System.out.println("At " + me +", " + "The AC number: "+acnumber+" for client: "+clientid+" does not exist");
 		else
 			System.out.println("At " + me +", " + "Inquiry command output: "+req_id+" for AC number: "+acnumber+" for client: "+clientid+" is "+rState.state.get(acnumber).balance);
+		System.out.flush();
 	}
 
 	private void withdraw(int clientid, int acnumber, double amount, ReplicaState rState) {
