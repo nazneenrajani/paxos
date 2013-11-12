@@ -7,9 +7,9 @@ import java.io.IOException;
  *
  */
 public class BankApplication extends Env {
-	boolean doFullPaxos = false;
-	boolean doFailureDetect = true;
-	boolean doKill = true; 
+	boolean doFullPaxos = true;
+	boolean doFailureDetect = false;
+	boolean doKill = false; 
 	
 	@Override
 	void run(String[] args){

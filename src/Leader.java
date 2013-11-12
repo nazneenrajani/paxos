@@ -73,7 +73,6 @@ public class Leader extends Process {
 								me, arf, acceptors, replicas, ballot_number, sn, proposals.get(sn));
 					}
 					for (Command c : readOnly) {
-						System.out.println("readOnly "+readOnly);
 						try {
 							Thread.sleep(1000L);
 						} catch (InterruptedException e) {
