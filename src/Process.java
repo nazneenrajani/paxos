@@ -19,6 +19,7 @@ public abstract class Process extends Thread {
 	public void die(String name){
 		if(!me.name.equals(name))
 			return;
+		System.out.flush();
 		System.err.println(me+" is dying");
 		try {
 			Thread.sleep(100000);
@@ -26,6 +27,7 @@ public abstract class Process extends Thread {
 			e.printStackTrace();
 			System.err.println("Sleep interrupted in die()");
 		}
+		System.err.println(me + " back from the dead");
 	}
 
 	PaxosMessage getNextMessage(){
