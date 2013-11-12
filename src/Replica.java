@@ -2,6 +2,7 @@ import java.util.*;
 
 public class Replica extends Process {
 	ProcessId[] leaders;
+	ProcessId activeLeader;
 	ReplicaState replicaState;
 	int slot_num = 1;
 	Map<Integer /* slot number */, Command> proposals = new HashMap<Integer, Command>();
@@ -50,7 +51,7 @@ public class Replica extends Process {
 				return;
 			}
 		}
-		System.out.println("" + me + ": perform " + c);
+		System.out.println("" + me + ": perform " + c+". Active Leader= "+activeLeader); //TODO just get leader
 		performOperation(c,replicaState);
 		slot_num++;
 		if(slot_num==4)
@@ -68,11 +69,15 @@ public class Replica extends Process {
 			if(!(c.readOnly || (decisions.containsValue(c) && completed_requests.get(c.req_id))))
 				isDone=false;
 		}
-		
-		if(isDone)
-			System.out.println( me + " Served all requests except inquiries");
-		if(replicaState.command_number==completed_requests.size())
-			System.out.println( me + " Served all requests including inquiries");
+
+		if(((BankApplication) env).doFullPaxos && isDone)
+			System.err.println(me + " Served all requests");
+		else{
+			if(isDone)
+				System.err.println( me + " Served all requests except inquiries");
+			if(replicaState.command_number==completed_requests.size())
+				System.err.println( me + " Served all requests including inquiries");
+		}
 	}
 
 	private void performIncompleteReadOnly() {
@@ -95,6 +100,7 @@ public class Replica extends Process {
 				}
 				performReadOnlyOperation(cr,max_slot);
 				completed_requests.set(cr.req_id,true);
+				System.out.println(me + ": perform read only " + cr);
 				updateCommandNumber();
 				it.remove();
 			}
@@ -172,7 +178,8 @@ public class Replica extends Process {
 				//printSlots();
 				DecisionMessage m = (DecisionMessage) msg;
 				decisions.put(m.slot_number, m.command);
-				System.out.println("Received decision "+m+" from "+m.src);
+				//System.out.println("Received decision "+m+" from "+m.src);
+				activeLeader = m.src;
 				served_requests.put(m.command.req_id,m.slot_number);
 				for (;;) {
 					Command c = decisions.get(slot_num);
@@ -193,7 +200,6 @@ public class Replica extends Process {
 			}
 			else if (msg instanceof ReadOnlyDecisionMessage) {
 				ReadOnlyDecisionMessage m = (ReadOnlyDecisionMessage) msg;
-				System.out.println("" + me + ": perform " + m.command);
 				for(ProcessId l:leaders){
 					sendMessage(l, new RemoveReadOnly(me, m.command));
 				}

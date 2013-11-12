@@ -8,7 +8,7 @@ public class Leader extends Process {
 	Map<Integer, Command> proposals = new HashMap<Integer, Command>();
 	Set<Command> readOnly = new HashSet<Command>();
 
-	Boolean doFailureDetect = true;
+	Boolean doFailureDetect = null;
 
 	public Leader(Env env, ProcessId me, ProcessId[] acceptors,
 			ProcessId[] replicas){
@@ -17,6 +17,7 @@ public class Leader extends Process {
 		ballot_number = new BallotNumber(0, me);
 		this.acceptors = acceptors;
 		this.replicas = replicas;
+		this.doFailureDetect = ((BankApplication) env).doFailureDetect;
 		env.addProc(me, this);
 	}
 
@@ -97,16 +98,19 @@ public class Leader extends Process {
 			}
 
 			else if (msg instanceof ReadOnlyPreemptedMessage) {
+				ballot_number.increaseTimeout();
 				System.out.println(me + "was preempted due to lease expiry");
 
 				ReadOnlyPreemptedMessage m = (ReadOnlyPreemptedMessage) msg;
 				readOnly.add(m.command);
-				//TODO failure detect
+
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
-					ballot_number = new BallotNumber(m.ballot_number.round + 1, me, m.ballot_number.timeout);
-					new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
-							me, acceptors, ballot_number);
-					active = false;
+					if(!isAlive(m.ballot_number.leader_id, m.ballot_number.timeout)){
+						ballot_number = new BallotNumber(m.ballot_number.round + 1, me, m.ballot_number.timeout);
+						new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
+								me, acceptors, ballot_number);
+						active = false;
+					}
 				}
 			}
 			else if (msg instanceof RemoveReadOnly) {

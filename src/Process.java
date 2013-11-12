@@ -17,7 +17,7 @@ public abstract class Process extends Thread {
 	}
 
 	public void die(String name){
-		if(!me.name.equals(name+",")) //TODO remove , here
+		if(!((BankApplication) env).doKill || !me.name.equals(name))
 			return;
 		System.out.flush();
 		System.err.println(me+" is dying");
