@@ -60,6 +60,11 @@ class AliveMessage extends PaxosMessage {
 	public AliveMessage(ProcessId src){
 		this.src = src;
 }	}
+class DecreaseTimeoutMessage extends PaxosMessage{
+	public DecreaseTimeoutMessage(ProcessId src){
+		this.src = src;
+	}
+}
 class MinReplicaMessage extends PaxosMessage {
 	ProcessId replicaId;
 	public MinReplicaMessage(ProcessId src, ProcessId replicaId){

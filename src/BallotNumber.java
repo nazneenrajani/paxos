@@ -3,11 +3,22 @@ public class BallotNumber implements Comparable {
 	ProcessId leader_id;
 	long lease_time;
 	long start_lease;
+	public long timeout = 1000L;
+	private long additiveDecreaseFactor = 100L;
+	private double multiplicativeIncreaseFactor = 1.1;
+
 	
 	public BallotNumber(int round, ProcessId leader_id){
 		this.round = round;
 		this.leader_id = leader_id;
 		this.lease_time=1000L;
+	}
+	
+	public BallotNumber(int round, ProcessId leader_id, long timeout){
+		this.round = round;
+		this.leader_id = leader_id;
+		this.lease_time=1000L;
+		this.timeout = timeout;
 	}
 
 	public boolean equals(Object other){
@@ -25,4 +36,15 @@ public class BallotNumber implements Comparable {
 	public String toString(){
 		return "BN(" + round + ", " + leader_id + ")";
 	}
+
+	public void increaseTimeout(){
+		timeout *= multiplicativeIncreaseFactor;
+	}
+
+	public void decreaseTimeout(){
+		timeout -= additiveDecreaseFactor;
+		if(timeout<0)
+			timeout=0;
+	}
+
 }

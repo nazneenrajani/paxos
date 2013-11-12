@@ -52,6 +52,7 @@ public class Commander extends Process {
 			for (ProcessId r: replicas) {
 				sendMessage(r, new DecisionMessage(me, slot_number, command));
 			}
+			sendMessage(leader, new DecreaseTimeoutMessage(me));
 		}
 		else{
 

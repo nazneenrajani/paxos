@@ -64,8 +64,8 @@ public class Replica extends Process {
 	}
 
 	private void performIncompleteReadOnly() {
-		if(incomplete_readOnly.size()>0) 
-			System.out.println("Pending ReadOnly requests at "+ me + " :" +incomplete_readOnly);
+		//if(incomplete_readOnly.size()>0) 
+			//System.out.println("Pending ReadOnly requests at "+ me + " :" +incomplete_readOnly);
 
 		Iterator<Command> it = incomplete_readOnly.iterator(); 
 		while(it.hasNext()){
@@ -161,6 +161,7 @@ public class Replica extends Process {
 				//printSlots();
 				DecisionMessage m = (DecisionMessage) msg;
 				decisions.put(m.slot_number, m.command);
+				System.out.println("Received decision "+m+" from "+m.src);
 				served_requests.put(m.command.req_id,m.slot_number);
 				for (;;) {
 					Command c = decisions.get(slot_num);

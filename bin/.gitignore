@@ -37,3 +37,10 @@
 /minReplicaNumMessage.class
 /MinReplicaMessage.class
 /GetMinReplicaMessage.class
+/DecreaseTimeoutMessage$GetMinReplicaMessage.class
+/DecreaseTimeoutMessage$MinReplicaMessage.class
+/DecreaseTimeoutMessage$ReadOnlyDecisionMessage.class
+/DecreaseTimeoutMessage$ReadOnlyPreemptedMessage.class
+/DecreaseTimeoutMessage$ReadOnlyProposeMessage.class
+/DecreaseTimeoutMessage$RemoveReadOnly.class
+/DecreaseTimeoutMessage.class
