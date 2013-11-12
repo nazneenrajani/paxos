@@ -65,8 +65,6 @@ public class Commander extends Process {
 			else{
 				sendMessage(leader, new ReadOnlyPreemptedMessage(me, ballot_number,command));
 			}
-
-
 		}
 	}
 }
