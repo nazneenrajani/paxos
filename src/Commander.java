@@ -52,6 +52,7 @@ public class Commander extends Process {
 			for (ProcessId r: replicas) {
 				sendMessage(r, new DecisionMessage(me, slot_number, command));
 			}
+			sendMessage(leader, new DecreaseTimeoutMessage(me));
 		}
 		else{
 
@@ -65,8 +66,6 @@ public class Commander extends Process {
 			else{
 				sendMessage(leader, new ReadOnlyPreemptedMessage(me, ballot_number,command));
 			}
-
-
 		}
 	}
 }

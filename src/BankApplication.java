@@ -12,10 +12,16 @@ import java.io.IOException;
  */
 public class BankApplication extends Env {
 	boolean doFullPaxos = false;
+	boolean doFailureDetect = true;
+	boolean doKill = true; 
+	
+	//TODO test case where replica:0 dies before it receives all commands. Currently replica:1 never tries
+	// Maybe add delay in leader when sending DecisionMessages
 	
 	@Override
 	void run(String[] args){
 		nLeaders = 5;
+		System.out.println("Current run: doFullPaxos=" + doFullPaxos + ", doFailureDetect = "+doFailureDetect);
 		
 		ProcessId[] acceptors = new ProcessId[nAcceptors];
 		ProcessId[] replicas = new ProcessId[nReplicas];

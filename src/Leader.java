@@ -8,19 +8,7 @@ public class Leader extends Process {
 	Map<Integer, Command> proposals = new HashMap<Integer, Command>();
 	Set<Command> readOnly = new HashSet<Command>();
 
-	Boolean doFailureDetect = false;
-
-	private long timeout = 1000L;
-	private long additiveDecreaseFactor = 100L;
-	private double multiplicativeIncreaseFactor = 1.1;
-
-	public void increaseTimeout(){
-		timeout *= multiplicativeIncreaseFactor;
-	}
-
-	public void decreaseTimeout(){
-		timeout -= additiveDecreaseFactor;
-	}
+	Boolean doFailureDetect = null;
 
 	public Leader(Env env, ProcessId me, ProcessId[] acceptors,
 			ProcessId[] replicas){
@@ -29,6 +17,7 @@ public class Leader extends Process {
 		ballot_number = new BallotNumber(0, me);
 		this.acceptors = acceptors;
 		this.replicas = replicas;
+		this.doFailureDetect = ((BankApplication) env).doFailureDetect;
 		env.addProc(me, this);
 	}
 
@@ -64,7 +53,6 @@ public class Leader extends Process {
 				}
 			}
 			else if (msg instanceof AdoptedMessage) {
-				decreaseTimeout();
 				die("leader:4");
 				System.out.println(me+ " is adopted as leader");
 				AdoptedMessage m = (AdoptedMessage) msg;
@@ -94,14 +82,14 @@ public class Leader extends Process {
 			}
 
 			else if (msg instanceof PreemptedMessage) {
-				increaseTimeout();
+				ballot_number.increaseTimeout();
 
 				PreemptedMessage m = (PreemptedMessage) msg;
 				System.out.println(me + " is preempted. Active leader is "+m.ballot_number.leader_id);
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
-					if(!isAlive(m.ballot_number.leader_id)){
+					if(!isAlive(m.ballot_number.leader_id, m.ballot_number.timeout)){
 						System.out.println(me + " Prempting "+m.ballot_number.leader_id);
-						ballot_number = new BallotNumber(m.ballot_number.round + 1, me);
+						ballot_number = new BallotNumber(m.ballot_number.round + 1, me, m.ballot_number.timeout);
 						new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
 								me, acceptors, ballot_number);
 						active = false;
@@ -110,15 +98,19 @@ public class Leader extends Process {
 			}
 
 			else if (msg instanceof ReadOnlyPreemptedMessage) {
+				ballot_number.increaseTimeout();
 				System.out.println(me + "was preempted due to lease expiry");
 
 				ReadOnlyPreemptedMessage m = (ReadOnlyPreemptedMessage) msg;
 				readOnly.add(m.command);
+
 				if (ballot_number.compareTo(m.ballot_number) < 0) {
-					ballot_number = new BallotNumber(m.ballot_number.round + 1, me);
-					new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
-							me, acceptors, ballot_number);
-					active = false;
+					if(!isAlive(m.ballot_number.leader_id, m.ballot_number.timeout)){
+						ballot_number = new BallotNumber(m.ballot_number.round + 1, me, m.ballot_number.timeout);
+						new Scout(env, new ProcessId("scout:" + me + ":" + ballot_number),
+								me, acceptors, ballot_number);
+						active = false;
+					}
 				}
 			}
 			else if (msg instanceof RemoveReadOnly) {
@@ -133,13 +125,16 @@ public class Leader extends Process {
 			else if (msg instanceof AliveMessage){
 				//drop
 			}
+			else if (msg instanceof DecreaseTimeoutMessage){
+				ballot_number.decreaseTimeout();
+			}
 			else {
 				System.err.println("Leader: unknown msg type "+ msg);
 			}
 		}
 	}
 
-	private boolean isAlive(ProcessId leader_id) {
+	private boolean isAlive(ProcessId leader_id, long timeout) {
 		if(!doFailureDetect)
 			return false;
 		PaxosMessage pxm = new FailureDetectMessage(me);

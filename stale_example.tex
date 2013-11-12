@@ -1,0 +1,26 @@
+\documentclass{article}
+
+\title{ Programming Assignment 2: Stale Example for Read Only Commands in Paxos}
+
+\author{ Harsh Pareek(hhp266), Naxneen Rajani(nnr259)}
+
+\begin{document}
+\maketitle
+
+In this document, we provide an example where the read only implementation in the van Renesse ``Paxos Made Complex'' paper gives stale results.
+
+Consider the following execution with 2 replicas R1 and R2, 1 leader L and 3 acceptors A1--A3, in the bank application setting:
+The client sends 2 commands, a deposit (D) for \$10 and an inquiry (I) to both replicas. I is a read only command. The client's balance is \$0 initially.
+
+\begin{itemize}
+\item R1 and R2 propose D and I to both leaders. Both propose D in slot 1. I is read only and is not assigned a slot.
+\item L is adopted by all acceptors. It has an appropriately long lease time which will not expire during this execution.
+\item Since L is adopted and has a valid lease, it instructs R1 to reply to I. This message is m11.
+\item L proposes D for slot 1, and is accepted. L sends this final decision for slot 1 to R1 and R2 through messages m21 and m22 respectively.
+\item m22 arrives at R2. R2 updates its state to \$10.
+\item Then, m11 arrives at R1. R1 responds to the client giving a balance as 0. This state is stale as R2 has already overwritten this value.
+\item Finally, m12 arrives at R1 and R1 updates the balance to \$10.
+\end{itemize}
+
+Thus, R1 returns stale state to the client. (Van Renesse notes that the leader should wait until all proposals are decided before sending, but as shown above, this is not enough. If instead the replica waits until all proposals are decided, stale data will not be returned, though this is inefficient.)
+\end{document}

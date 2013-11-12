@@ -54,7 +54,7 @@ public class AliveReplicaFinder extends Process {
 						}
 						continue;
 					}
-					System.out.println(minAliveReplica + " is the minAliveReplica");
+					//System.out.println(minAliveReplica + " is the minAliveReplica");
 					sendMessage(msg.src, new MinReplicaMessage(me, minAliveReplica));
 				} else {
 					System.err.println("AliveReplicaFinder: Unknown message type "+msg);
